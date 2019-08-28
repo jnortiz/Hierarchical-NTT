@@ -47,7 +47,7 @@ def hierarchical_ntt(poly_x):
         for j in range(Nb):
             x_ntt[i*Nb+j] = x_ntt[i*Nb+j]*pow(factor,i*Nb+j,p)
 
-    x_ntt2 = transpose([ntt64(x_ntt[i::Nb]) for i in range(Na)]).reshape(Na*Nb).tolist()[0]
+    x_ntt2 = transpose([ntt64(x_ntt[i::Nb]) for i in range(Nb)]).reshape(Na*Nb).tolist()
 
     return x_ntt2
 
@@ -64,7 +64,7 @@ def hierarchical_intt(poly_x_ntt): # The matrix is transposed!
         for j in range(Na):
             x_ntt2[i*Na+j] = x_ntt2[i*Na+j]*pow(factor_inv,i*Na+j,p)
 
-    x = transpose([intt128(x_ntt2[i::Na]) for i in range(Nb)]).reshape(Nb*Na).tolist()[0]
+    x = transpose([intt128(x_ntt2[i::Na]) for i in range(Na)]).reshape(Nb*Na).tolist()
 
     return x
 
