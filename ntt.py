@@ -23,18 +23,6 @@ rootNainv = invMod(rootNa,p)
 
 bitreversal = lambda n,width:int('{:0{width}b}'.format(n, width=width)[::-1], 2)
 
-def schoolbook_mul(a, b):
-    assert len(a) == len(b)
-    
-    N = len(a)
-    c = [0]*N
-
-    for i in range(N):
-        for j in range(N):
-            v = a[i]*b[j]*(-1)**(int((i+j)//float(N)))
-            c[(i+j) % N] = (c[(i+j) % N] + v) % p
-    return c   
-
 def transpose(x):
     return array(x).reshape(Na, Nb).transpose().reshape(Na * Nb).tolist()
 
@@ -207,10 +195,13 @@ class TestNTT(unittest.TestCase):
         g_inv = invMod(g,p)
 
         for _ in range(N_RUNS):        
-            a = gen_polynomial_modp(N)        
-            b = gen_polynomial_modp(N)
+            a = gen_polynomial_modp(N//2)        
+            b = gen_polynomial_modp(N//2)
 
-            ab = schoolbook_mul(a,b)
+            ab = list(polymul(a,b)%p)
+
+            a = a + [0]*(N//2)
+            b = b + [0]*(N//2)
 
             a_ntt = ntt(a,N,g)
             b_ntt = ntt(b,N,g)
@@ -218,6 +209,9 @@ class TestNTT(unittest.TestCase):
             c_ntt = [(x*y) for x,y in zip(a_ntt, b_ntt)]
 
             c = intt(c_ntt,N,g_inv)
+
+            c = remove_zeros(c)
+            ab = remove_zeros(ab)
 
             self.assertEqual(ab,c)
 
