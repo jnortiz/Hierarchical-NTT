@@ -7,8 +7,6 @@ import random
 from numpy import reshape, array, polymul
 from math import log,floor
 
-index = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 0, 2, 4, 6, 8, 10, 12, 14, 0, 3, 6, 9, 12, 15, 18, 21, 0, 4, 8, 12, 16, 20, 24, 28, 0, 5, 10, 15, 20, 25, 30, 35, 0, 6, 12, 18, 24, 30, 36, 42, 0, 7, 14, 21, 28, 35, 42, 49]
-
 N_RUNS = 10**3
 p = 12289
 g = 7311 # 64-th root of unity in Z_p
@@ -38,9 +36,9 @@ def hierarchical_ntt(x):
     s = list(x)
 
     s = transpose(s)
-    s = sum([list(ntt_simple(s[i*Na:i*Na+Na],Na,rootNa)) for i in range(Nb)], [])
-    s = [y*pow(g,index[i],p)%p for i,y in enumerate(s)]
-    s = sum([list(ntt_simple(s[i::Na],Nb,rootNa)) for i in range(Nb)],[])
+    s = sum([ntt_simple(s[i*Na:i*Na+Na],Na,rootNa) for i in range(Nb)], [])
+    s = [y*pow(g,(i // Na) * (i % Na),p)%p for i,y in enumerate(s)]
+    s = sum([ntt_simple(s[i::Na],Nb,rootNa) for i in range(Nb)],[])
 
     return s
 
@@ -49,9 +47,9 @@ def hierarchical_intt(x):
 
     s = list(x)
 
-    s = sum([list(intt_simple(s[i*Nb:i*Nb+Nb],Nb,rootNainv)) for i in range(Na)],[])
-    s = [y*pow(invMod(g,p),index[i],p)%p for i,y in enumerate(s)]
-    s = (sum([list(intt_simple(s[i::Na],Nb,rootNainv)) for i in range(Nb)], []))
+    s = sum([intt_simple(s[i*Nb:i*Nb+Nb],Nb,rootNainv) for i in range(Na)],[])
+    s = [y*pow(invMod(g,p),(i // Na) * (i % Na),p)%p for i,y in enumerate(s)]
+    s = (sum([intt_simple(s[i::Na],Nb,rootNainv) for i in range(Nb)], []))
     s = transpose(s)
 
     return s
