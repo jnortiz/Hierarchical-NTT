@@ -1,15 +1,18 @@
-index = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 0, 2, 4, 6, 8, 10, 12, 14, 0, 3, 6, 9, 12, 15, 18, 21, 0, 4, 8, 12, 16, 20, 24, 28, 0, 5, 10, 15, 20, 25, 30, 35, 0, 6, 12, 18, 24, 30, 36, 42, 0, 7, 14, 21, 28, 35, 42, 49]
+invMod = lambda y,p:pow(y,p-2,p)
 
 p = 12289
-Na = 8
-Nb = 8
-N = Na*Nb
+Nr = 2
+Nc = 4
+N = Nr*Nc # N = 8
 
-g = 7311 # 64-th root of unity in Z_p
-g_inv = 9650
+g = 8246 # 8-th root of unity in Z_p
+g_inv = invMod(g,p)
 
-psi = 12149 #128-th root of unity in Z_p
-psi_inv = 790
+psi = 4134 #16-th root of unity in Z_p
+psi_inv = invMod(psi, p)
 
-root_Na = 8246 #8-th root of unity
-root_Na_inv = 7143
+root_Nr = 12288 #2-th root of unity
+root_Nr_inv = invMod(root_Nr, p)
+
+root_Nc = 1479 #4-th root of unity
+root_Nc_inv = invMod(root_Nc, p)

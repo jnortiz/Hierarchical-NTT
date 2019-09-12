@@ -6,7 +6,6 @@ from numpy import reshape, array, polymul
 from math import log,floor
 from params import *
 
-invMod = lambda y,p:pow(y,p-2,p)
 bitreversal = lambda n,width:int('{:0{width}b}'.format(n, width=width)[::-1], 2)
 
 def schoolbook_mul(a, b):
@@ -31,30 +30,38 @@ def gen_polynomial_modp(length):
     return x
 
 def hierarchical_ntt(x):
+    
     assert(len(x) == N)
 
     s = list(x)
 
-    s = [y*pow(psi,i,p)%p for i,y in enumerate(s)]  # Negative wrapped convolution      
-    s = transpose(s)
-    s = sum([list(ntt_simple(s[i*Na:i*Na+Na],Na,root_Na)) for i in range(Nb)], [])
-    s = [y*pow(g,(i // Na) * (i % Na),p)%p for i,y in enumerate(s)]    
-    s = sum([list(ntt_simple(s[i::Na],Nb,root_Na)) for i in range(Nb)],[])
-
-    return s
+    s = [s[i]*pow(psi,i,p)%p for i in range(N)]  # Negative wrapped convolution      
+  
+    s = sum([list(ntt_simple(s[i*Nc:i*Nc+Nc],Nc,root_Nc)) for i in range(Nr)], [])
+  
+    s_ntt = []
+    for i in range(Nc):
+        s_ntt.append(ntt_simple(s[i::Nc],Nr,root_Nr))
+    s_ntt = array(s_ntt).reshape(len(s_ntt),len(s_ntt[0])).transpose().reshape(len(s_ntt[0])*len(s_ntt))
+    
+    return s_ntt
 
 def hierarchical_intt(x):
+
     assert(len(x) == N)
 
     s = list(x)
 
-    s = sum([list(intt_simple(s[i*Nb:i*Nb+Nb],Nb,root_Na_inv)) for i in range(Na)],[])
-    s = [y*pow(g_inv,(i // Na) * (i % Na),p)%p for i,y in enumerate(s)]    
-    s = sum([list(intt_simple(s[i::Na],Nb,root_Na_inv)) for i in range(Nb)], [])    
-    s = transpose(s)    
-    s = [y*pow(psi_inv,i,p)%p for i,y in enumerate(s)] # Negative wrapped convolution   
+    s_ntt = []
+    for i in range(Nc):
+        s_ntt.append(intt_simple(s[i::Nc],Nr,root_Nr_inv))
+    s_ntt = list(array(s_ntt).reshape(len(s_ntt),len(s_ntt[0])).transpose().reshape(len(s_ntt[0])*len(s_ntt)))
 
-    return s  
+    s_ntt = sum([list(intt_simple(s_ntt[i*Nc:i*Nc+Nc],Nc,root_Nc_inv)) for i in range(Nr)], [])
+    
+    s_ntt = [s_ntt[i]*pow(psi_inv,i,p)%p for i in range(N)]  # Negative wrapped convolution      
+
+    return s_ntt  
 
 def poly_mul_pointwise(x_ntt, y_ntt):
     xy = [(x*y)%p for x,y in zip(x_ntt, y_ntt)]
@@ -86,7 +93,10 @@ def intt_simple(x,N,rootinv):
 def hierarchical_ntt_mul(a, b):
     
     a_ntt = hierarchical_ntt(a)
+    assert(hierarchical_intt(a_ntt) == a)
+    
     b_ntt = hierarchical_ntt(b)
+    assert(hierarchical_intt(b_ntt) == b)
 
     c_ntt = poly_mul_pointwise(a_ntt, b_ntt)
 
