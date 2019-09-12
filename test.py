@@ -2,19 +2,19 @@ import unittest
 from params import *
 from ntt import *
 
-N_RUNS = 10**1
+N_RUNS = 1
 
-def remove_zeros(y):
+def schoolbook_mul(a, b):
+    assert len(a) == len(b)
     
-    x = list(y)
+    N = len(a)
+    c = [0]*N
 
-    while(x[0] == 0):
-        x.remove(0)
-
-    while(x[len(x)-1] == 0):
-        x.pop()
-
-    return x
+    for i in range(N):
+        for j in range(N):
+            v = a[i]*b[j]*(-1)**(int((i+j)//float(N)))
+            c[(i+j) % N] = (c[(i+j) % N] + v) % p
+    return c    
 
 class TestNTT(unittest.TestCase):
 
@@ -22,7 +22,6 @@ class TestNTT(unittest.TestCase):
         print("\nHierarchical NTT transformation")
         
         for i in range(N_RUNS):
-            
             a = gen_polynomial_modp(N)
 
             b = hierarchical_intt(hierarchical_ntt(a))
@@ -32,15 +31,14 @@ class TestNTT(unittest.TestCase):
     def test_mul(self):        
         print("\nHierarchical polynomial multiplication")
 
-        for _ in range(1):
+        for _ in range(N_RUNS):
+            a = gen_polynomial_modp(N)
+            b = gen_polynomial_modp(N)
 
-            a = [1]*N
-            b = [1]*N
-            
+            ab = schoolbook_mul(a,b)
             c = hierarchical_ntt_mul(a, b)
 
-            print(c)
-            #self.assertEqual(ab,c)
+            self.assertEqual(ab,c)
 
 if __name__ == '__main__':
     unittest.main()

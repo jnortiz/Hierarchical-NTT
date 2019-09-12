@@ -6,22 +6,8 @@ from numpy import reshape, array, polymul
 from math import log,floor
 from params import *
 
-bitreversal = lambda n,width:int('{:0{width}b}'.format(n, width=width)[::-1], 2)
-
-def schoolbook_mul(a, b):
-    assert len(a) == len(b)
-    
-    N = len(a)
-    c = [0]*N
-
-    for i in range(N):
-        for j in range(N):
-            v = a[i]*b[j]*(-1)**(int((i+j)//float(N)))
-            c[(i+j) % N] = (c[(i+j) % N] + v) % p
-    return c   
-
-def transpose(x):
-    return array(x).reshape(Na, Nb).transpose().reshape(Na * Nb).tolist()
+def transpose(x, Nr, Nc):
+    return array(x).reshape(Nr, Nc).transpose().reshape(Nr*Nc).tolist()
 
 def gen_polynomial_modp(length):
     x = []
@@ -33,33 +19,45 @@ def hierarchical_ntt(x):
     
     assert(len(x) == N)
 
-    s = list(x)
+    rows = Nr
+    cols = Nc
 
-    s = [s[i]*pow(psi,i,p)%p for i in range(N)]  # Negative wrapped convolution      
+    s = list(x)
+    s = [s[i]*pow(psi,i,p)%p for i in range(N)]  # Negative wrapped convolution
+    s = transpose(s, rows, cols)
+
+    rows = Nc
+    cols = Nr
   
-    s = sum([list(ntt_simple(s[i*Nc:i*Nc+Nc],Nc,root_Nc)) for i in range(Nr)], [])
-  
-    s_ntt = []
-    for i in range(Nc):
-        s_ntt.append(ntt_simple(s[i::Nc],Nr,root_Nr))
-    s_ntt = array(s_ntt).reshape(len(s_ntt),len(s_ntt[0])).transpose().reshape(len(s_ntt[0])*len(s_ntt))
-    
-    return s_ntt
+    s = sum([list(ntt_simple(s[i*cols:i*cols+cols],cols,root_Nr)) for i in range(rows)], [])
+    s = [s[i]*pow(g,(i//cols)*(i%cols),p)%p for i in range(N)]
+    s = transpose(s, rows, cols)
+
+    rows = Nr
+    cols = Nc
+
+    s = sum([list(ntt_simple(s[i*cols:i*cols+cols],cols,root_Nc)) for i in range(rows)], [])
+     
+    return s
 
 def hierarchical_intt(x):
 
     assert(len(x) == N)
 
-    s = list(x)
+    rows = Nr
+    cols = Nc
 
-    s_ntt = []
-    for i in range(Nc):
-        s_ntt.append(intt_simple(s[i::Nc],Nr,root_Nr_inv))
-    s_ntt = list(array(s_ntt).reshape(len(s_ntt),len(s_ntt[0])).transpose().reshape(len(s_ntt[0])*len(s_ntt)))
+    s_ntt = list(x)
+    s_ntt = sum([list(intt_simple(s_ntt[i*cols:i*cols+cols],cols,root_Nc_inv)) for i in range(rows)], [])
+    s_ntt = [s_ntt[i]*pow(g_inv,(i//cols)*(i%cols),p)%p for i in range(N)]
+    s_ntt = transpose(s_ntt, rows, cols)
 
-    s_ntt = sum([list(intt_simple(s_ntt[i*Nc:i*Nc+Nc],Nc,root_Nc_inv)) for i in range(Nr)], [])
-    
-    s_ntt = [s_ntt[i]*pow(psi_inv,i,p)%p for i in range(N)]  # Negative wrapped convolution      
+    rows = Nc
+    cols = Nr
+
+    s_ntt = sum([list(intt_simple(s_ntt[i*cols:i*cols+cols],cols,root_Nr_inv)) for i in range(rows)], [])
+    s_ntt = transpose(s_ntt, rows, cols)
+    s_ntt = [s_ntt[i]*pow(psi_inv,i,p)%p for i in range(N)]  # Negative wrapped convolution  
 
     return s_ntt  
 
