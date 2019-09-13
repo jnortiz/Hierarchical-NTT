@@ -21,14 +21,18 @@ def hierarchical_ntt(x):
 
     s = list(x)
     
-    # Negative wrapped convolution
+    # Forward negative wrapped convolution
     s = [s[i]*pow(psi,i,p)%p for i in range(N)]
     
+    # This transposition format the input as column-major (as in Fortran language, which was used by David H. Bailey)
+    s = array(s).reshape(Nr, Nc).transpose().reshape(Nr*Nc).tolist()
+
     # Forward hierarchical NTT
-    s = sum([list(ntt_simple(s[i::Nc],Nr,root_Nr)) for i in range(Nc)],[]) 
+    s = sum([list(ntt_simple(s[i*Nr:i*Nr+Nr],Nr,root_Nr)) for i in range(Nc)], [])
     s = [s[i]*pow(g,(i//Nr)*(i%Nr),p)%p for i in range(N)]
-    s = sum([list(ntt_simple(s[i::Nr],Nc,root_Nc)) for i in range(Nr)],[])
-     
+    s = array(s).reshape(Nc, Nr).transpose().reshape(Nr*Nc).tolist()
+    s = sum([list(ntt_simple(s[i*Nc:i*Nc+Nc],Nc,root_Nc)) for i in range(Nr)], [])     
+
     return s
 
 def hierarchical_intt(x):
@@ -38,12 +42,15 @@ def hierarchical_intt(x):
     s = list(x)
 
     # Inverse hierarchical NTT
-    s = sum([list(intt_simple(s[i*Nc:i*Nc+Nc],Nc,root_Nc_inv)) for i in range(Nr)], [])
+    s = sum([list(intt_simple(s[i*Nc:i*Nc+Nc],Nc,root_Nc_inv)) for i in range(Nr)], [])     
     s = [s[i]*pow(g_inv,(i//Nc)*(i%Nc),p)%p for i in range(N)]
-    s = sum([list(intt_simple(s[i::Nc],Nr,root_Nr_inv)) for i in range(Nc)],[])
+    s = array(s).reshape(Nr, Nc).transpose().reshape(Nr*Nc).tolist()
+    s = sum([list(intt_simple(s[i*Nr:i*Nr+Nr],Nr,root_Nr_inv)) for i in range(Nc)], [])
+
+    # This transposition format the output as row-major
     s = array(s).reshape(Nc, Nr).transpose().reshape(Nr*Nc).tolist()
 
-    # Negative wrapped convolution
+    # Inverse negative wrapped convolution
     s = [s[i]*pow(psi_inv,i,p)%p for i in range(N)] 
 
     return s  
