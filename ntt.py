@@ -19,24 +19,15 @@ def hierarchical_ntt(x):
     
     assert(len(x) == N)
 
-    rows = Nr
-    cols = Nc
-
     s = list(x)
-    s = [s[i]*pow(psi,i,p)%p for i in range(N)]  # Negative wrapped convolution
-    s = transpose(s, rows, cols)
-
-    rows = Nc
-    cols = Nr
-  
-    s = sum([list(ntt_simple(s[i*cols:i*cols+cols],cols,root_Nr)) for i in range(rows)], [])
-    s = [s[i]*pow(g,(i//cols)*(i%cols),p)%p for i in range(N)]
-    s = transpose(s, rows, cols)
-
-    rows = Nr
-    cols = Nc
-
-    s = sum([list(ntt_simple(s[i*cols:i*cols+cols],cols,root_Nc)) for i in range(rows)], [])
+    
+    # Negative wrapped convolution
+    s = [s[i]*pow(psi,i,p)%p for i in range(N)]
+    
+    # Forward hierarchical NTT
+    s = sum([list(ntt_simple(s[i::Nc],Nr,root_Nr)) for i in range(Nc)],[]) 
+    s = [s[i]*pow(g,(i//Nr)*(i%Nr),p)%p for i in range(N)]
+    s = sum([list(ntt_simple(s[i::Nr],Nc,root_Nc)) for i in range(Nr)],[])
      
     return s
 
@@ -44,22 +35,18 @@ def hierarchical_intt(x):
 
     assert(len(x) == N)
 
-    rows = Nr
-    cols = Nc
+    s = list(x)
 
-    s_ntt = list(x)
-    s_ntt = sum([list(intt_simple(s_ntt[i*cols:i*cols+cols],cols,root_Nc_inv)) for i in range(rows)], [])
-    s_ntt = [s_ntt[i]*pow(g_inv,(i//cols)*(i%cols),p)%p for i in range(N)]
-    s_ntt = transpose(s_ntt, rows, cols)
+    # Inverse hierarchical NTT
+    s = sum([list(intt_simple(s[i*Nc:i*Nc+Nc],Nc,root_Nc_inv)) for i in range(Nr)], [])
+    s = [s[i]*pow(g_inv,(i//Nc)*(i%Nc),p)%p for i in range(N)]
+    s = sum([list(intt_simple(s[i::Nc],Nr,root_Nr_inv)) for i in range(Nc)],[])
+    s = array(s).reshape(Nc, Nr).transpose().reshape(Nr*Nc).tolist()
 
-    rows = Nc
-    cols = Nr
+    # Negative wrapped convolution
+    s = [s[i]*pow(psi_inv,i,p)%p for i in range(N)] 
 
-    s_ntt = sum([list(intt_simple(s_ntt[i*cols:i*cols+cols],cols,root_Nr_inv)) for i in range(rows)], [])
-    s_ntt = transpose(s_ntt, rows, cols)
-    s_ntt = [s_ntt[i]*pow(psi_inv,i,p)%p for i in range(N)]  # Negative wrapped convolution  
-
-    return s_ntt  
+    return s  
 
 def poly_mul_pointwise(x_ntt, y_ntt):
     xy = [(x*y)%p for x,y in zip(x_ntt, y_ntt)]
