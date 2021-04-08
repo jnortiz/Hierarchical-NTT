@@ -18,18 +18,25 @@ invMod = lambda y,p:pow(y,p-2,p)
 # root_Nc_inv = invMod(root_Nc, p)
 
 p = 12289
+primitive_root_of_p = 11
 Nr = 2
 Nc = 4
 N = Nr*Nc # N = 8
 
-g = 8246 # 8-th root of unity in Z_p
+g = pow(primitive_root_of_p, (p-1)//N, p) #primitive 8-th root of unity in Z_p
 g_inv = invMod(g,p)
 
-psi = 4134 #16-th root of unity in Z_p
+psi = pow(primitive_root_of_p, (p-1)//(2*N), p) #primitive 16-th root of unity in Z_p
 psi_inv = invMod(psi, p)
 
-root_Nr = 12288 #2-th root of unity
+root_Nr = pow(primitive_root_of_p, (p-1)//Nr, p) #primitive 2-th root of unity
 root_Nr_inv = invMod(root_Nr, p)
 
-root_Nc = 1479 #4-th root of unity
+root_Nc = pow(primitive_root_of_p, (p-1)//Nc, p) #primitive 4-th root of unity
 root_Nc_inv = invMod(root_Nc, p)
+
+assert(pow(g, N, p) == 1)
+assert(pow(g_inv, N, p) == 1)
+
+assert(pow(psi, 2*N, p) == 1)
+assert(pow(psi_inv, 2*N, p) == 1)
