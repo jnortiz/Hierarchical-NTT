@@ -3,11 +3,12 @@
 
 import random
 import unittest
+import numpy as np
 from params import *
 from hierarchical_ntt import hierarchical_ntt, hierarchical_intt, hierarchical_ntt_mul
 
 
-N_RUNS = 100
+N_RUNS = 1
 
 
 def schoolbook_mul(a, b):
@@ -18,8 +19,9 @@ def schoolbook_mul(a, b):
 
     for i in range(N):
         for j in range(N):
-            v = a[i]*b[j]*(-1)**(int((i+j)//float(N)))
-            c[(i+j) % N] = (c[(i+j) % N] + v) % p
+            v = a[i] * b[j] * (-1) ** (int((i + j) // float(N)))
+            c[(i + j) % N] = (c[(i + j) % N] + v) % p
+
     return c
 
 
@@ -37,7 +39,6 @@ class TestNTT(unittest.TestCase):
 
         for i in range(N_RUNS):
             a = gen_polynomial_modp(N)
-
             b = hierarchical_intt(hierarchical_ntt(a))
 
             self.assertEqual(a, b)
