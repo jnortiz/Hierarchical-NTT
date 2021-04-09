@@ -12,6 +12,7 @@ def hierarchical_ntt(x):
     s = list(x)
 
     # Forward negative wrapped convolution
+    # psi is a power of the primitive root
     s = [s[i] * pow(psi, i, p) % p for i in range(N)]
 
     # Forward hierarchical NTT

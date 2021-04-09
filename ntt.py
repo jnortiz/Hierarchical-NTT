@@ -21,6 +21,7 @@ def poly_mul_pointwise(x_ntt, y_ntt):
     return [(x * y) % p for x, y in zip(x_ntt, y_ntt)]
 
 
+# gentleman-sande ntt
 def ntt_gs(x):
 
     r = list(x)
@@ -43,6 +44,7 @@ def ntt_gs(x):
     return bitrev_shuffle(r)
 
 
+# cooley-tukey intt
 def intt_ct(x):
 
     r = list(x)
@@ -67,6 +69,7 @@ def intt_ct(x):
     return [(x * invMod(N_local, p)) % p for x in r]
 
 
+# gentleman-sande ntt
 def rewritten_ntt_gs(x):
 
     r = list(x)
@@ -87,6 +90,7 @@ def rewritten_ntt_gs(x):
     return r
 
 
+# cooley-tukey intt
 def rewritten_intt_ct(x):
 
     r = list(x)
