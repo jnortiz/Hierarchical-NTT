@@ -7,7 +7,7 @@ from params import *
 from ntt import ntt_gs, intt_ct, poly_mul, rewritten_ntt_gs, rewritten_intt_ct, poly_mul_rewritten
 
 
-N_RUNS = 1
+N_RUNS = 1000
 
 
 def schoolbook_mul(a, b):
@@ -46,12 +46,12 @@ class TestNTT(unittest.TestCase):
 
         print("\n Polynomial multiplication using NTT-GS and INTT-CT")
 
-        a = gen_polynomial_modp(N)
-        b = gen_polynomial_modp(N)
-        c_prime = schoolbook_mul(a, b)
-        c = poly_mul(a, b)
-
-        self.assertEqual(c_prime, c)
+        for i in range(N_RUNS):
+            a = gen_polynomial_modp(N)
+            b = gen_polynomial_modp(N)
+            c_prime = schoolbook_mul(a, b)
+            c = poly_mul(a, b)
+            self.assertEqual(c_prime, c)
 
     def test_transformation_rewritten(self):
 
@@ -66,12 +66,12 @@ class TestNTT(unittest.TestCase):
 
         print("\n Polynomial multiplication using rewritten NTT-GS and INTT-CT")
 
-        a = gen_polynomial_modp(N)
-        b = gen_polynomial_modp(N)
-        c_prime = schoolbook_mul(a, b)
-        c = poly_mul_rewritten(a, b)
-
-        self.assertEqual(c_prime, c)
+        for i in range(N_RUNS):
+            a = gen_polynomial_modp(N)
+            b = gen_polynomial_modp(N)
+            c_prime = schoolbook_mul(a, b)
+            c = poly_mul_rewritten(a, b)
+            self.assertEqual(c_prime, c)
 
 
 if __name__ == '__main__':

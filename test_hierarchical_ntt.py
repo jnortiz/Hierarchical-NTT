@@ -3,12 +3,11 @@
 
 import random
 import unittest
-import numpy as np
 from params import *
 from hierarchical_ntt import hierarchical_ntt, hierarchical_intt, hierarchical_ntt_mul
 
 
-N_RUNS = 1
+N_RUNS = 1000
 
 
 def schoolbook_mul(a, b):

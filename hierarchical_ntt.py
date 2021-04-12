@@ -1,4 +1,3 @@
-from numpy import reshape, array
 from math import log
 
 from ntt import rewritten_ntt_gs as ntt, rewritten_intt_ct as intt
@@ -37,12 +36,21 @@ def hierarchical_intt(x):
     s = sum([list(intt(s[i:: Nc])) for i in range(Nc)], [])
 
     # This transposition format the output as row-major
-    s = array(s).reshape(Nc, Nr).transpose().reshape(Nr * Nc).tolist()
+    s = transpose(s)
 
     # Inverse negative wrapped convolution
     s = [(s[i] * pow(psi_inv, i, p)) % p for i in range(N)]
 
     return s
+
+
+def transpose(s):
+    # The initial arrangement is assumed to be Nc x Nr
+    aux_s = []
+    for j in range(Nr):
+        for i in range(Nc):
+            aux_s.append(s[i * Nr + j])
+    return aux_s
 
 
 def poly_mul_pointwise(x_ntt, y_ntt):
